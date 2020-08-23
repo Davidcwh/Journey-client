@@ -11,6 +11,8 @@ export default function LandingPage() {
       .then(video => setBackgroundVideo(video))
   }, [])
 
+  console.dir(backgroundVideo);
+
   return (
     <section className="wrapper">
       {
@@ -18,7 +20,7 @@ export default function LandingPage() {
           <div className="video-wrap">
           <video poster={backgroundVideo.image} autoPlay muted loop preload="auto">
             {backgroundVideo.video_files.map(video => {
-              return <source src={video.link} type={video.file_type}></source>
+              return <source key={video.id} src={video.link} type={video.file_type}></source>
             })}
             
           </video>
@@ -27,8 +29,8 @@ export default function LandingPage() {
       }
 
       <div className="overlay"></div>
-      <div className="ui text container landing-text">
-          <h1 className="ui inverted header">Journey</h1>
+      <div className="ui text container landing-text nonselectable">
+          <h1 className="ui inverted header ">Journey</h1>
           <h2>A Visualized Travel Journal</h2>
           <div className="ui inverted">
             <Link className="buttonLinks" to="/signup">
