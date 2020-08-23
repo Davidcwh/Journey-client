@@ -5,15 +5,18 @@ import { Auth } from "aws-amplify";
 import '../styles/Login.css';
 import { setIsAuthenticated } from '../redux/actions';
 import { onError } from '../libs/errorLibs';
+import { useFormFields } from "../libs/hooksLib";
 
 function Login({ setIsAuthenticated }) {
     const history = useHistory();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [isButtonLoading, setButtonLoading] = useState(false);
+    const [fields, handleFieldChange] = useFormFields( {
+        email: "",
+        password: ""
+    })
 
     function validateForm() {
-        return email.length > 0 && password.length > 0;
+        return fields.email.length > 0 && fields.password.length > 0;
     }
 
     async function handleSubmit(event) {
@@ -21,7 +24,7 @@ function Login({ setIsAuthenticated }) {
       
         try {
             setButtonLoading(true);
-            const user = await Auth.signIn(email, password);
+            const user = await Auth.signIn(fields.email, fields.password);
             console.log('user:');
             console.dir(user);
             setIsAuthenticated(true);
@@ -54,8 +57,8 @@ function Login({ setIsAuthenticated }) {
                                 type="text" 
                                 name="email" 
                                 placeholder="Email address"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}/>
+                                value={fields.email}
+                                onChange={handleFieldChange}/>
                         </div>
                     </div>            
 
@@ -66,8 +69,8 @@ function Login({ setIsAuthenticated }) {
                                 type="password" 
                                 name="password" 
                                 placeholder="Password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}/>
+                                value={fields.password}
+                                onChange={handleFieldChange}/>
                         </div>
                     </div>
 
