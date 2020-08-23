@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Routes from "./Routes";
 import { connect } from 'react-redux';
 import { useHistory } from "react-router-dom";
-import { setIsAuthenticated } from './redux/actions';
+import { setIsLoggedIn } from './redux/actions';
 import { Auth } from "aws-amplify";
 import './App.css';
 
-function App({ setIsAuthenticated }) {
+function App({ setIsLoggedIn }) {
   const history = useHistory();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
 
@@ -17,7 +17,7 @@ function App({ setIsAuthenticated }) {
   async function onLoad() {
     try {
       await Auth.currentSession();
-      setIsAuthenticated(true);
+      setIsLoggedIn(true);
       history.push('/home');
     } catch(e) {
       if(e !== 'No current user') {
@@ -39,7 +39,7 @@ function App({ setIsAuthenticated }) {
 
 const mapDispatchToProps = dispatch => {
   return {
-      setIsAuthenticated: (bool) => {dispatch(setIsAuthenticated(bool))}
+      setIsLoggedIn: (bool) => {dispatch(setIsLoggedIn(bool))}
   }
 }
 

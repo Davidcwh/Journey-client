@@ -2,15 +2,15 @@ import React from "react";
 import { connect } from 'react-redux';
 import { Auth } from "aws-amplify";
 import { useHistory } from "react-router-dom";
-import { setIsAuthenticated } from "../redux/actions";
+import { userLogOut } from "../redux/actions";
 import '../styles/Home.css';
 
-function Home( { setIsAuthenticated }) {
+function Home( { userLogOut }) {
     const history = useHistory();
 
     async function handleLogout() {
         await Auth.signOut();
-        setIsAuthenticated(false);
+        userLogOut();
         history.push('/');
     }
 
@@ -28,7 +28,7 @@ function Home( { setIsAuthenticated }) {
 
 const mapDispatchToProps = dispatch => {
     return {
-        setIsAuthenticated: (bool) => {dispatch(setIsAuthenticated(bool))}
+        userLogOut: () => {dispatch(userLogOut())}
     }
 }
 

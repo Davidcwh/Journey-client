@@ -3,7 +3,8 @@ import { Route, Switch } from "react-router-dom";
 import LandingPage from "./containers/LandingPage";
 import NotFound from "./containers/NotFound";
 import Login from "./containers/Login";
-import Home from './containers/Home'
+import Signup from "./containers/Signup";
+import Home from './containers/Home';
 
 export default function Routes() {
   return (
@@ -14,6 +15,10 @@ export default function Routes() {
 
       <Route exact path="/login">
         <Login />
+      </Route>
+
+      <Route exact path="/signup">
+        <Signup />
       </Route>
 
       <Route exact path="/home">

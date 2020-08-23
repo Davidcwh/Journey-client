@@ -1,0 +1,27 @@
+.grid {
+    height: 100%;
+    color: white;
+}
+
+.column {
+    max-width: 450px;
+}
+
+.title {
+    font-size: 5em;
+    letter-spacing: 0.2em;
+    color: #74C69D;
+}
+
+.label {
+    text-align: left;
+}
+
+.login-link {
+    color: #74C69D;
+
+}
+
+.login-link:hover{
+    color: #40916C;
+}

@@ -2,21 +2,26 @@ import React, { useState } from "react";
 import { connect } from 'react-redux';
 import { Link, useHistory } from "react-router-dom";
 import { Auth } from "aws-amplify";
-import '../styles/Login.css';
-import { setIsLoggedIn, setIsVerified } from '../redux/actions';
+import '../styles/Signup.css';
+import { setIsLoggedIn } from '../redux/actions';
 import { onError } from '../libs/errorLibs';
 import { useFormFields } from "../libs/hooksLib";
 
-function Login({ setIsLoggedIn }) {
+function Signup({ setIsLoggedIn }) {
     const history = useHistory();
-    const [isFormLoading, setFormLoading] = useState(false);
-    const [fields, handleFieldChange] = useFormFields( {
+    const [fields, handleFieldChange] = useFormFields({
         email: "",
-        password: ""
-    })
+        password: "",
+        confirmPassword: ""
+    });
+    const [isFormLoading, setFormLoading] = useState(false);
 
     function validateForm() {
-        return fields.email.length > 0 && fields.password.length > 0;
+        return (
+            fields.email.length > 0 &&
+            fields.password.length > 0 &&
+            fields.password === fields.confirmPassword
+        );
     }
 
     async function handleSubmit(event) {
@@ -24,20 +29,17 @@ function Login({ setIsLoggedIn }) {
       
         try {
             setFormLoading(true);
-            const user = await Auth.signIn(fields.email, fields.password);
-            console.log('user:');
-            console.dir(user);
-            setIsVerified(true);
+            const newUser = await Auth.signUp({
+                username: fields.email,
+                password: fields.password
+            });
+            console.log('new user:');
+            console.dir(newUser);
+
             setIsLoggedIn(true);
-            console.log("here")
             history.push('/home');
         } catch (e) {
-            if(e.name === "UserNotConfirmedException") {
-                setIsLoggedIn(true);
-                history.push('/home');
-            } else {
-                onError(e);
-            }
+            onError(e);
         } finally {
             setFormLoading(false);
         }
@@ -55,10 +57,11 @@ function Login({ setIsLoggedIn }) {
                 </Link>
                 
                 
-                <h2 className="nonselectable">Login to your account</h2>
+                <h2 className="nonselectable">Sign up to get started</h2>
 
                 <form className="ui inverted form">
                     <div className={`required field ${fieldDisabledClassName}`}>
+                        <label className="label">Email Address</label>
                         <div class="ui left icon input">
                             <i class="user icon"></i>
                             <input 
@@ -71,6 +74,7 @@ function Login({ setIsLoggedIn }) {
                     </div>            
 
                     <div className={`required field ${fieldDisabledClassName}`}>
+                        <label className="label">Password</label>
                         <div class="ui left icon input">
                             <i class="lock icon"></i>
                             <input 
@@ -82,16 +86,29 @@ function Login({ setIsLoggedIn }) {
                         </div>
                     </div>
 
+                    <div className={`required field ${fieldDisabledClassName}`}>
+                        <label className="label">Confirm Password</label>
+                        <div class="ui left icon input">
+                            <i class="lock icon"></i>
+                            <input 
+                                type="password" 
+                                name="confirmPassword" 
+                                placeholder="Confirm Password"
+                                value={fields.confirmPassword}
+                                onChange={handleFieldChange}/>
+                        </div>
+                    </div>
+
                     <div 
                         class={`ui fluid large inverted submit button ${buttonDisabledClassName} ${buttonLoadingClassName}`}
                         onClick={handleSubmit}>
-                        Login
+                        Sign up
                     </div>
                 </form>
 
                 <div className="ui inverted message nonselectable">
-                    New to us?
-                    <Link className="sign-up-link" to="/signup"> Sign up here</Link>
+                    Already have an account?
+                    <Link className="login-link" to="/login"> Login here</Link>
                 </div>
             </div>
         </div>
@@ -100,9 +117,8 @@ function Login({ setIsLoggedIn }) {
 
 const mapDispatchToProps = dispatch => {
     return {
-        setIsLoggedIn: (bool) => {dispatch(setIsLoggedIn(bool))},
-        setIsVerified: (bool) => {dispatch(setIsVerified(bool))}
+        setIsLoggedIn: (bool) => {dispatch(setIsLoggedIn(bool))}
     }
 }
 
-export default connect(null, mapDispatchToProps)(Login);
+export default connect(null, mapDispatchToProps)(Signup);

@@ -2,15 +2,25 @@ import { combineReducers } from 'redux';
 import actionTypes from './actions/actionTypes';
 
 const defaultUser = {
-    isAuthenticated: false
+    isLoggedIn: false,
+    isVerified: false
 }
 
 const userReducer = (state=defaultUser, action) => {
-    const newUser = { ...state }
+    const newUser = { ...state };
 
     switch(action.type) {
-        case actionTypes.USER.SET_IS_AUTHENTICATED:
-            newUser.isAuthenticated = action.payload;
+        case actionTypes.USER.SET_IS_LOGGED_IN:
+            newUser.isLoggedIn = action.payload;
+            break;
+
+        case actionTypes.USER.SET_IS_VERIFIED:
+            newUser.isVerified = action.payload;
+            break;
+
+        case actionTypes.USER.USER_LOG_OUT:
+            newUser.isLoggedIn = false;
+            newUser.isVerified = false;
             break;
 
         default:
