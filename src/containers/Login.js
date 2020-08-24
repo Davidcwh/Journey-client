@@ -6,46 +6,59 @@ import '../styles/Login.css';
 import { setIsLoggedIn, verifiedUserLogIn } from '../redux/actions';
 import { onError } from '../libs/errorLibs';
 import { useFormFields } from "../libs/hooksLib";
+import loginFormValidationRules from '../config/loginFormValidationRules.json';
+import formFieldErrorHandler from '../libs/formFieldsErrorHandler';
+import formFieldAuthErrorHandler from '../libs/formFieldsAuthErrorHandler';
 
 function Login({ setIsLoggedIn, verifiedUserLogIn }) {
     const history = useHistory();
     const [isFormLoading, setFormLoading] = useState(false);
-    const [fields, handleFieldChange] = useFormFields( {
-        email: "",
-        password: ""
-    })
-
-    function validateForm() {
-        return fields.email.length > 0 && fields.password.length > 0;
-    }
-
+    const [fields, handleFieldChange, handleErrorFields] = useFormFields([ "email", "password" ]);
+    
     async function handleSubmit(event) {
         event.preventDefault();
       
         try {
             setFormLoading(true);
-            const user = await Auth.signIn(fields.email, fields.password);
+            const errorResult = formFieldErrorHandler(loginFormValidationRules, fields);
+            if(errorResult.errorFields.length > 0) {
+                handleErrorFields(errorResult);
+                return;
+            }
+
+            const user = await Auth.signIn(fields.email.value, fields.password.value);
             console.log('user:');
             console.dir(user);
 
             verifiedUserLogIn();
             console.log("here")
             history.push('/home');
-        } catch (e) {
-            if(e.name === "UserNotConfirmedException") {
+        } catch (error) {
+            if(error.name === "UserNotConfirmedException") {
                 setIsLoggedIn(true);
                 history.push('/home');
             } else {
-                onError(e);
+                const authErrorMessage = formFieldAuthErrorHandler(error);
+                const errorFields = [];
+                for(let field in fields) {
+                    if(field !== "errorMessages") {
+                        errorFields.push(field);
+                    }
+                }
+
+                handleErrorFields({ errorMessages: [authErrorMessage], errorFields});
+                return;
+                //onError(error);
             }
         } finally {
             setFormLoading(false);
         }
     }
 
-    const buttonDisabledClassName = !validateForm() ? "disabled" : "";
     const buttonLoadingClassName = isFormLoading ? "loading" : "";
     const fieldDisabledClassName = isFormLoading ? "disabled" : "";
+
+    const displayErrorMessages = !(fields.errorMessages.length === 0);
 
     return (
         <div className="ui middle aligned center aligned grid">
@@ -57,35 +70,43 @@ function Login({ setIsLoggedIn, verifiedUserLogIn }) {
                 
                 <h2 className="nonselectable">Login to your account</h2>
 
-                <form className="ui inverted form">
-                    <div className={`required field ${fieldDisabledClassName}`}>
-                        <div class="ui left icon input">
-                            <i class="user icon"></i>
+                <form className={`ui inverted form ${displayErrorMessages ? "error" : ""}`}>
+                    <div className={`required field ${fieldDisabledClassName} ${fields.email.hasError ? "error" : ""}`}>
+                        <div className="ui left icon input">
+                            <i className="user icon"></i>
                             <input 
                                 type="text" 
                                 name="email" 
                                 placeholder="Email address"
-                                value={fields.email}
+                                value={fields.email.value}
                                 onChange={handleFieldChange}/>
                         </div>
                     </div>            
 
-                    <div className={`required field ${fieldDisabledClassName}`}>
-                        <div class="ui left icon input">
-                            <i class="lock icon"></i>
+                    <div className={`required field ${fieldDisabledClassName} ${fields.password.hasError ? "error" : ""}`}>
+                        <div className="ui left icon input">
+                            <i className="lock icon"></i>
                             <input 
                                 type="password" 
                                 name="password" 
                                 placeholder="Password"
-                                value={fields.password}
+                                value={fields.password.value}
                                 onChange={handleFieldChange}/>
                         </div>
                     </div>
 
                     <div 
-                        class={`ui fluid large inverted submit button ${buttonDisabledClassName} ${buttonLoadingClassName}`}
+                        className={`ui fluid large inverted submit button ${buttonLoadingClassName}`}
                         onClick={handleSubmit}>
                         Login
+                    </div>
+
+                    <div className="ui message error">
+                        <ul className="list">
+                            {fields.errorMessages.map(errorMessage => {
+                                return <li key={errorMessage}>{errorMessage}</li>
+                            })}
+                        </ul>
                     </div>
                 </form>
 

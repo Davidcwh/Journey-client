@@ -1,0 +1,10 @@
+[
+    {
+        "fieldName": "email",
+        "condition": "exists"
+    },
+    {
+        "fieldName": "password",
+        "condition": "exists"
+    }
+]
