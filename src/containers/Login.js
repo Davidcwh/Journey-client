@@ -3,11 +3,11 @@ import { connect } from 'react-redux';
 import { Link, useHistory } from "react-router-dom";
 import { Auth } from "aws-amplify";
 import '../styles/Login.css';
-import { setIsLoggedIn, setIsVerified } from '../redux/actions';
+import { setIsLoggedIn, verifiedUserLogIn } from '../redux/actions';
 import { onError } from '../libs/errorLibs';
 import { useFormFields } from "../libs/hooksLib";
 
-function Login({ setIsLoggedIn }) {
+function Login({ setIsLoggedIn, verifiedUserLogIn }) {
     const history = useHistory();
     const [isFormLoading, setFormLoading] = useState(false);
     const [fields, handleFieldChange] = useFormFields( {
@@ -27,8 +27,8 @@ function Login({ setIsLoggedIn }) {
             const user = await Auth.signIn(fields.email, fields.password);
             console.log('user:');
             console.dir(user);
-            setIsVerified(true);
-            setIsLoggedIn(true);
+
+            verifiedUserLogIn();
             console.log("here")
             history.push('/home');
         } catch (e) {
@@ -101,7 +101,7 @@ function Login({ setIsLoggedIn }) {
 const mapDispatchToProps = dispatch => {
     return {
         setIsLoggedIn: (bool) => {dispatch(setIsLoggedIn(bool))},
-        setIsVerified: (bool) => {dispatch(setIsVerified(bool))}
+        verifiedUserLogIn: () => {verifiedUserLogIn()(dispatch)}
     }
 }
 

@@ -19,3 +19,11 @@ export const userLogOut = (bool) => {
         type: actionTypes.USER.USER_LOG_OUT
     }
 }
+
+// Action creators - for dispatching multiple actions at once
+export const verifiedUserLogIn = () => {
+    return dispatch => {
+        dispatch(setIsLoggedIn(true));
+        dispatch(setIsVerified(true));
+    }
+}
