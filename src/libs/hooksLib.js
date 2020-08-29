@@ -1,35 +1,46 @@
 import { useState } from "react";
 
 export function useFormFields(fieldNames) {
-    const initialState = { errorMessages: [] };
+    const initialState = { fieldNames: {}, errorMessages: [] };
     fieldNames.forEach(fieldName => {
-        initialState[fieldName] = {
+        initialState.fieldNames[fieldName] = {
             value: "",
             hasError: false
         }
     })
 
-    const [fields, setValues] = useState(initialState);
+    const [form, setValues] = useState(initialState);
 
     return [
-            fields,
+            form,
             function(event) {
-
                 setValues({
-                    ...fields,
-                    [event.target.name]: {
-                        value: event.target.value,
-                        hasError: false
+                    errorMessages: form.errorMessages,
+                    fieldNames: {
+                        ...form.fieldNames,
+                        [event.target.name]: {
+                            value: event.target.value,
+                            hasError: false
+                        }
                     }
+                    
                 });
                 
             },
             function({ errorFields, errorMessages }) {
-                const newState = { ...fields };
+                const newState = { errorMessages, fieldNames: {} };
+                for(let field in form.fieldNames) {
+                    newState.fieldNames[field] = {
+                        value: form.fieldNames[field].value,
+                        hasError: false
+                    }
+                }
+
                 errorFields.forEach(errorField => {
-                    newState[errorField].hasError = true;
+                    if(newState.fieldNames[errorField]) {
+                        newState.fieldNames[errorField].hasError = true;
+                    }
                 });
-                newState.errorMessages = errorMessages;
 
                 setValues(newState);
             }

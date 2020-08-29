@@ -6,48 +6,63 @@ import '../styles/Signup.css';
 import { setIsLoggedIn } from '../redux/actions';
 import { onError } from '../libs/errorLibs';
 import { useFormFields } from "../libs/hooksLib";
+import SignupFormValidationRules from '../config/SignupFormValidationRules.json';
+import formFieldErrorHandler from '../libs/formFieldsErrorHandler';
+import formFieldAuthErrorHandler from '../libs/formFieldsAuthErrorHandler';
 
 function Signup({ setIsLoggedIn }) {
     const history = useHistory();
-    const [fields, handleFieldChange] = useFormFields({
-        email: "",
-        password: "",
-        confirmPassword: ""
-    });
+    const [form, handleFieldChange, handleErrorFields] = useFormFields([ "email", "password", "confirmPassword" ]);
     const [isFormLoading, setFormLoading] = useState(false);
 
-    function validateForm() {
-        return (
-            fields.email.length > 0 &&
-            fields.password.length > 0 &&
-            fields.password === fields.confirmPassword
-        );
-    }
+    const { fieldNames, errorMessages } = form;
+    const { email, password, confirmPassword } = fieldNames;
 
     async function handleSubmit(event) {
         event.preventDefault();
       
         try {
             setFormLoading(true);
-            const newUser = await Auth.signUp({
-                username: fields.email,
-                password: fields.password
-            });
-            console.log('new user:');
-            console.dir(newUser);
+            
+            //Apply validation checks on field values
+            const errorResult = formFieldErrorHandler(SignupFormValidationRules, form);
+            if(errorResult.errorFields.length > 0) { // if errors are returned
+                handleErrorFields(errorResult);      // Use hook to render highlight fields and error messages
+                return;
+            }
 
-            setIsLoggedIn(true);
-            history.push('/home');
-        } catch (e) {
-            onError(e);
+            // No validation errors here, so attempt sign up
+            const newUser = await Auth.signUp({
+                username: email.value,
+                password: password.value
+            });
+            // console.log('new user:');
+            // console.dir(newUser);
+
+            setIsLoggedIn(true);    // Sign up successful, log new user in
+            history.push('/home');  // Redirect to home page
+        } catch (error) { // Error from signing up
+            const authErrorMessage = formFieldAuthErrorHandler(error); // Process thrown aws amplify error and return the corresponding error message
+            const errorFields = [];
+            for(let field in fieldNames) {
+                errorFields.push(field); // Highlight all fields in the form for error
+            }
+
+            handleErrorFields({ errorMessages: [authErrorMessage], errorFields}); // Use hook to render highlight fields and error messages
+            //onError(error)
+            return;
         } finally {
             setFormLoading(false);
         }
     }
 
-    const buttonDisabledClassName = !validateForm() ? "disabled" : "";
-    const buttonLoadingClassName = isFormLoading ? "loading" : "";
-    const fieldDisabledClassName = isFormLoading ? "disabled" : "";
+    function getClassNameFromCondition(condition, className) {
+        return condition ? className : "";
+    }
+
+    const formShowErrorCondition = !(errorMessages.length === 0) && !isFormLoading;
+
+    console.dir(form)
 
     return (
         <div className="ui middle aligned center aligned grid">
@@ -59,8 +74,10 @@ function Signup({ setIsLoggedIn }) {
                 
                 <h2 className="nonselectable">Sign up to get started</h2>
 
-                <form className="ui inverted form">
-                    <div className={`required field ${fieldDisabledClassName}`}>
+                <form className={`ui inverted form ${getClassNameFromCondition(formShowErrorCondition, "error")}`}>
+                    <div className={`required field 
+                        ${getClassNameFromCondition(isFormLoading, "disabled")} 
+                        ${getClassNameFromCondition(email.hasError, "error")}`}>
                         <label className="label">Email Address</label>
                         <div class="ui left icon input">
                             <i class="user icon"></i>
@@ -68,12 +85,14 @@ function Signup({ setIsLoggedIn }) {
                                 type="text" 
                                 name="email" 
                                 placeholder="Email address"
-                                value={fields.email}
+                                value={email.value}
                                 onChange={handleFieldChange}/>
                         </div>
                     </div>            
 
-                    <div className={`required field ${fieldDisabledClassName}`}>
+                    <div className={`required field 
+                        ${getClassNameFromCondition(isFormLoading, "disabled")} 
+                        ${getClassNameFromCondition(password.hasError, "error")}`}>
                         <label className="label">Password</label>
                         <div class="ui left icon input">
                             <i class="lock icon"></i>
@@ -81,12 +100,14 @@ function Signup({ setIsLoggedIn }) {
                                 type="password" 
                                 name="password" 
                                 placeholder="Password"
-                                value={fields.password}
+                                value={password.value}
                                 onChange={handleFieldChange}/>
                         </div>
                     </div>
 
-                    <div className={`required field ${fieldDisabledClassName}`}>
+                    <div className={`required field 
+                        ${getClassNameFromCondition(isFormLoading, "disabled")} 
+                        ${getClassNameFromCondition(confirmPassword.hasError, "error")}`}>
                         <label className="label">Confirm Password</label>
                         <div class="ui left icon input">
                             <i class="lock icon"></i>
@@ -94,15 +115,23 @@ function Signup({ setIsLoggedIn }) {
                                 type="password" 
                                 name="confirmPassword" 
                                 placeholder="Confirm Password"
-                                value={fields.confirmPassword}
+                                value={confirmPassword.value}
                                 onChange={handleFieldChange}/>
                         </div>
                     </div>
 
                     <div 
-                        class={`ui fluid large inverted submit button ${buttonDisabledClassName} ${buttonLoadingClassName}`}
+                        class={`ui fluid large inverted submit button ${getClassNameFromCondition(isFormLoading, "loading")}`}
                         onClick={handleSubmit}>
                         Sign up
+                    </div>
+
+                    <div className="ui message error">
+                        <ul className="list">
+                            {errorMessages.map(errorMessage => {
+                                return <li key={errorMessage}>{errorMessage}</li>
+                            })}
+                        </ul>
                     </div>
                 </form>
 

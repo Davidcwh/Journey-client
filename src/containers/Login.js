@@ -13,25 +13,27 @@ import formFieldAuthErrorHandler from '../libs/formFieldsAuthErrorHandler';
 function Login({ setIsLoggedIn, verifiedUserLogIn }) {
     const history = useHistory();
     const [isFormLoading, setFormLoading] = useState(false);
-    const [fields, handleFieldChange, handleErrorFields] = useFormFields([ "email", "password" ]);
+    const [form, handleFieldChange, handleErrorFields] = useFormFields([ "email", "password" ]);
+
+    const { fieldNames, errorMessages } = form;
+    const { email, password } = fieldNames;
     
     async function handleSubmit(event) {
         event.preventDefault();
       
         try {
             setFormLoading(true);
-            const errorResult = formFieldErrorHandler(loginFormValidationRules, fields);
+            const errorResult = formFieldErrorHandler(loginFormValidationRules, form);
             if(errorResult.errorFields.length > 0) {
                 handleErrorFields(errorResult);
                 return;
             }
 
-            const user = await Auth.signIn(fields.email.value, fields.password.value);
-            console.log('user:');
-            console.dir(user);
+            const user = await Auth.signIn(email.value, password.value);
+            // console.log('user:');
+            // console.dir(user);
 
             verifiedUserLogIn();
-            console.log("here")
             history.push('/home');
         } catch (error) {
             if(error.name === "UserNotConfirmedException") {
@@ -40,10 +42,8 @@ function Login({ setIsLoggedIn, verifiedUserLogIn }) {
             } else {
                 const authErrorMessage = formFieldAuthErrorHandler(error);
                 const errorFields = [];
-                for(let field in fields) {
-                    if(field !== "errorMessages") {
-                        errorFields.push(field);
-                    }
+                for(let field in fieldNames) {
+                    errorFields.push(field);
                 }
 
                 handleErrorFields({ errorMessages: [authErrorMessage], errorFields});
@@ -55,10 +55,11 @@ function Login({ setIsLoggedIn, verifiedUserLogIn }) {
         }
     }
 
-    const buttonLoadingClassName = isFormLoading ? "loading" : "";
-    const fieldDisabledClassName = isFormLoading ? "disabled" : "";
+    function getClassNameFromCondition(condition, className) {
+        return condition ? className : "";
+    }
 
-    const displayErrorMessages = !(fields.errorMessages.length === 0);
+    const formShowErrorCondition = !(errorMessages.length === 0) && !isFormLoading;
 
     return (
         <div className="ui middle aligned center aligned grid">
@@ -70,40 +71,44 @@ function Login({ setIsLoggedIn, verifiedUserLogIn }) {
                 
                 <h2 className="nonselectable">Login to your account</h2>
 
-                <form className={`ui inverted form ${displayErrorMessages ? "error" : ""}`}>
-                    <div className={`required field ${fieldDisabledClassName} ${fields.email.hasError ? "error" : ""}`}>
+                <form className={`ui inverted form ${getClassNameFromCondition(formShowErrorCondition, "error")}`}>
+                    <div className={`required field
+                         ${getClassNameFromCondition(isFormLoading, "disabled")} 
+                         ${getClassNameFromCondition(email.hasError, "error")}`}>
                         <div className="ui left icon input">
                             <i className="user icon"></i>
                             <input 
                                 type="text" 
                                 name="email" 
                                 placeholder="Email address"
-                                value={fields.email.value}
+                                value={email.value}
                                 onChange={handleFieldChange}/>
                         </div>
                     </div>            
 
-                    <div className={`required field ${fieldDisabledClassName} ${fields.password.hasError ? "error" : ""}`}>
+                    <div className={`required field 
+                        ${getClassNameFromCondition(isFormLoading, "disabled")} 
+                        ${getClassNameFromCondition(password.hasError, "error")}`}>
                         <div className="ui left icon input">
                             <i className="lock icon"></i>
                             <input 
                                 type="password" 
                                 name="password" 
                                 placeholder="Password"
-                                value={fields.password.value}
+                                value={password.value}
                                 onChange={handleFieldChange}/>
                         </div>
                     </div>
 
                     <div 
-                        className={`ui fluid large inverted submit button ${buttonLoadingClassName}`}
+                        className={`ui fluid large inverted submit button ${getClassNameFromCondition(isFormLoading, "loading")}`}
                         onClick={handleSubmit}>
                         Login
                     </div>
 
                     <div className="ui message error">
                         <ul className="list">
-                            {fields.errorMessages.map(errorMessage => {
+                            {errorMessages.map(errorMessage => {
                                 return <li key={errorMessage}>{errorMessage}</li>
                             })}
                         </ul>
