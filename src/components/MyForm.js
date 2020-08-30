@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import '../styles/myForm.css';
 import { useFormFields } from "../libs/hooksLib";
 import formFieldErrorHandler from '../libs/formFieldsErrorHandler';
 import formFieldAuthErrorHandler from '../libs/formFieldsAuthErrorHandler';
+import '../styles/myForm.css';
 
 function MyForm({ formConfig, onSubmit }) {
     const { fields, validationRules, title, button, bottomMessage } = formConfig;
@@ -17,7 +17,7 @@ function MyForm({ formConfig, onSubmit }) {
     async function handleSubmit(event) {
         event.preventDefault();
         
-        await onSubmit(event,
+        await onSubmit(form,
                        validationRules, 
                        history, 
                        setFormLoading, 
@@ -88,4 +88,4 @@ function MyForm({ formConfig, onSubmit }) {
     )
 }
 
-export default myForm;
+export default MyForm;

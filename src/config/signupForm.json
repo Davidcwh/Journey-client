@@ -1,0 +1,59 @@
+{
+    "fields": [
+        {
+            "name": "email",
+            "icon": "user",
+            "input": {
+                "type": "text",
+                "name": "email",
+                "placeholder": "Email Address"
+            }
+        },
+        {
+            "name": "password",
+            "icon": "lock",
+            "input": {
+                "type": "password",
+                "name": "password",
+                "placeholder": "Password"
+            }
+        },
+        {
+            "name": "confirmPassword",
+            "icon": "lock",
+            "input": {
+                "type": "password",
+                "name": "confirmPassword",
+                "placeholder": "Confirm Password"
+            }
+        }
+    ],
+    "validationRules": [
+        {
+            "fieldName": "email",
+            "condition": "exists"
+        },
+        {
+            "fieldName": "password",
+            "condition": "exists"
+        },
+        {
+            "fieldName": "password",
+            "condition": "equals",
+            "otherFieldName": "confirmPassword"
+        }
+    ],
+    "title": {
+        "mainLabel": "Journey",
+        "link": "/",
+        "subLabel": "Sign up to get started"
+    },
+    "button": {
+        "label": "Sign up"
+    },
+    "bottomMessage": {
+        "nonLinkText": "Already have an account?",
+        "linkText": " Login here",
+        "link": "/login"
+    }
+}
