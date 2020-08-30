@@ -1,0 +1,45 @@
+{
+    "fields": [
+        {
+            "name": "email",
+            "icon": "user",
+            "input": {
+                "type": "text",
+                "name": "email",
+                "placeholder": "Email Address"
+            }
+        },
+        {
+            "name": "password",
+            "icon": "lock",
+            "input": {
+                "type": "password",
+                "name": "password",
+                "placeholder": "Password"
+            }
+        }
+    ],
+    "validationRules": [
+        {
+            "fieldName": "email",
+            "condition": "exists"
+        },
+        {
+            "fieldName": "password",
+            "condition": "exists"
+        }
+    ],
+    "title": {
+        "mainLabel": "Journey",
+        "link": "/",
+        "subLabel": "Login to your account"
+    },
+    "button": {
+        "label": "Login"
+    },
+    "bottomMessage": {
+        "nonLinkText": "New to us?",
+        "linkText": " Sign up here",
+        "link": "/signup"
+    }
+}
